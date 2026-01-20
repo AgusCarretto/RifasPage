@@ -1,5 +1,6 @@
 ﻿using LogicaAccesoDatos.EF;
 using LogicaNegocio;
+using LogicaNegocio.DTOs;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -26,9 +27,12 @@ namespace LogicaAccesoDatos.Repositorios
         {
             try
             {
-            return this.Context.Rifas.ToList();
+                return this.Context.Rifas
+            .Include(r => r.comprador)
+            .ToList();
 
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception("Error al obtener las rifas", ex);
             }
@@ -47,15 +51,33 @@ namespace LogicaAccesoDatos.Repositorios
 
         public void ReservarRifa(int idRifa, int idComprador)
         {
+
             var rifa = this.Context.Rifas.Find(idRifa);
             if (rifa != null)
             {
                 rifa.state = Rifa.EstadoRifa.Reservado;
                 rifa.CompradorId = idComprador;
+
                 this.Context.SaveChanges();
             }
 
         }
+
+        public MejorCompradorDTO ObtenerMejorComprador()
+        {
+            return this.Context.Rifas
+        .Include(r => r.comprador)
+        .Where(r => r.comprador != null && r.state != Rifa.EstadoRifa.Disponible)
+        .GroupBy(r => r.comprador.name) 
+        .Select(g => new MejorCompradorDTO
+        {
+            Nombre = g.Key,
+            Cantidad = g.Count()
+        })
+        .OrderByDescending(x => x.Cantidad)
+        .FirstOrDefault();
+        }
+
 
     }
 }

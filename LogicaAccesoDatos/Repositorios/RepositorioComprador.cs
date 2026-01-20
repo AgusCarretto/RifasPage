@@ -19,10 +19,15 @@ namespace LogicaAccesoDatos.Repositorios
 
         public int Agregar(Comprador nuevo)
         {
+
+            nuevo.Validar();
             this.Context.Compradores.Add(nuevo);
             this.Context.SaveChanges();
             return nuevo.id;
+
         }
+
+
 
 
     }

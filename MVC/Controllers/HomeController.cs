@@ -23,6 +23,19 @@ namespace MVC.Controllers
         public IActionResult Index()
         {
             var rifas = _repoRifa.ObtenerTodas();
+
+            int total = rifas.Count();
+            int vendidas = rifas.Count(r => r.state == Rifa.EstadoRifa.Vendido || r.state == Rifa.EstadoRifa.Reservado);
+
+            var mejorComprador = _repoRifa.ObtenerMejorComprador();
+
+            //En caso que sea nullo manda el se el primero o el 0 para que se sepa que no hay comprador
+            ViewBag.MejorComprador = mejorComprador?.Nombre ?? "¡Sé el primero!";
+            ViewBag.MejorCantidad = mejorComprador?.Cantidad ?? 0;
+            ViewBag.Porcentaje = (total > 0) ? (vendidas * 100 / total) : 0;
+            ViewBag.RifasRestantes = total - vendidas;
+
+
             return View(rifas);
         }
 
@@ -39,31 +52,42 @@ namespace MVC.Controllers
 
 
         [HttpPost]
-        public IActionResult Reservar (int idRifa, string nombre, string telefono, string email)
+        public IActionResult Reservar(int idRifa, string nombre, string telefono, string email)
         {
-            var nuevoComprador = new Comprador
-            {
-                name = nombre,
-                phoneNumber = telefono,
-                email = email
-            };
-
-            int idNuevoComprador = _repoComprador.Agregar(nuevoComprador);
-            _repoRifa.ReservarRifa(idRifa, idNuevoComprador);
 
             try
             {
-                var emailService = new ServicioEmail();
-                emailService.EnviarAlertaReserva(nombre, idRifa.ToString(), email, telefono);
+                var nuevoComprador = new Comprador
+                {
+                    name = nombre,
+                    phoneNumber = telefono,
+                    email = email
+                };
+
+                int idNuevoComprador = _repoComprador.Agregar(nuevoComprador);
+                _repoRifa.ReservarRifa(idRifa, idNuevoComprador);
+
+                try
+                {
+                    var emailService = new ServicioEmail();
+                    emailService.EnviarAlertaReserva(nombre, idRifa.ToString(), email, telefono);
+                }
+                catch (Exception ex) 
+                {
+                    
+                }
+
+
+                return RedirectToAction("Index");
+
             }
-            catch
+            catch (Exception ex)
             {
-                // Si el mail falla, que la app no se rompa, la reserva ya se hizo
+                ViewBag.Error = ex.Message;
+                var rifas = _repoRifa.ObtenerTodas();
+
+                return View("Index", rifas);
             }
-
-
-            return RedirectToAction("Index");
-
 
         }
 

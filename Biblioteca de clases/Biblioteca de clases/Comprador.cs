@@ -1,5 +1,6 @@
 ﻿using LogicaNegocio.Interfaces;
 using System.Collections;
+using System.Text.RegularExpressions;
 
 namespace LogicaNegocio
 {
@@ -20,7 +21,29 @@ namespace LogicaNegocio
 
         public void Validar()
         {
-            throw new NotImplementedException();
+            validarMail();
         }
+
+
+        public void validarMail()
+        {
+            string caracteres = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+
+            //Esto es para que no venga nullo ni con espacios
+            if (string.IsNullOrWhiteSpace(this.email))
+            {
+                throw new Exception("Ingrese un mail valido");
+            }
+
+            //Famoso Regex
+            if (!Regex.IsMatch(this.email, caracteres))
+            {
+                throw new Exception("Ingrese un mail valido");
+            }
+
+
+        }
+
+
     }
 }

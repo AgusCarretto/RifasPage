@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LogicaAccesoDatos.EF;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,19 @@ namespace LogicaAccesoDatos.Repositorios
 {
     public class RepositorioAdmin
     {
+
+        public ProyectoContext Context { get; set; }
+        public RepositorioAdmin(ProyectoContext context)
+        {
+            this.Context = context;
+        }
+
+       
+        public bool loginUsuario(string name, string pass)
+        {
+            return Context.Admin.Any(a => a.name == name && a.password == pass);
+
+        }
+
     }
 }

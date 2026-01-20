@@ -1,68 +1,11 @@
 ﻿@model IEnumerable<LogicaNegocio.Rifa>
-
+@section Styles {
+    <link rel="stylesheet" href="~/css/rigas-grid.css" asp-append-version="true" />
+}
 @{
     ViewData["Title"] = "Venta de Rifas";
 }
 
-<style>
-    /* Contenedor principal de la grilla */
-    .rifas-grid {
-        display: grid;
-        /* Crea columnas de mínimo 100px que llenan el espacio disponible */
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 15px;
-        padding: 20px;
-    }
-
-    /* Estilo base de cada cuadrado (Rifa) */
-    .rifa-box {
-        aspect-ratio: 1 / 1; /* Hace que sean cuadrados perfectos */
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        color: white;
-        font-weight: bold;
-        text-decoration: none;
-        transition: transform 0.2s, box-shadow 0.2s;
-        border: 2px solid rgba(0,0,0,0.1);
-    }
-
-    .rifa-box:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        color: white;
-    }
-
-    /* Clases según el EstadoRifa (Enum) */
-    /* Importante: el .ToLower() en el código asegura que coincidan */
-    .disponible {
-        background-color: #28a745; /* Verde */
-        cursor: pointer;
-    }
-
-    .reservado {
-        background-color: #ffc107; /* Amarillo/Naranja */
-        color: #212529;
-        cursor: wait;
-    }
-
-    .vendido {
-        background-color: #dc3545; /* Rojo */
-        cursor: not-allowed;
-        opacity: 0.8;
-    }
-
-    .numero-rifa {
-        font-size: 1.5rem;
-    }
-
-    .precio-rifa {
-        font-size: 0.8rem;
-        opacity: 0.9;
-    }
-</style>
 
 
 @if (!Model.Any())
@@ -73,8 +16,9 @@
 
 <div class="container">
     <div class="text-center my-5">
-        <h1 class="display-4">🎟️ Rifas Londres</h1>
-        <p class="lead">Haz clic en un número verde para reservar tu rifa.</p>
+        <h1 class="brand-title">LONDRES 2027</h1>
+        <p class="brand-subtitle">Sorteos & Rifas</p>
+        <hr style="width: 50px; border: 2px solid #2e7d32; margin: 10px auto;">
 
         <div class="d-flex justify-content-center gap-3 mt-3">
             <span class="badge bg-success">Disponible</span>
@@ -83,31 +27,64 @@
         </div>
     </div>
 
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h5 class="mb-3 fw-bold text-muted" style="letter-spacing: 2px; font-size: 0.8rem;">🎯 OBJETIVO DE LA COLECTA</h5>
+
+                <div class="progress mb-3">
+                    <div class="progress-bar progress-bar-striped"
+                         role="progressbar"
+                         style="width: @ViewBag.Porcentaje%;"
+                         aria-valuenow="@ViewBag.Porcentaje"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                        @ViewBag.Porcentaje%
+                    </div>
+                </div>
+
+                <p class="text-muted mb-4 fs-5 ">
+                    ¡Ya completamos el <strong>@ViewBag.Porcentaje%</strong>! Solo quedan <strong>@ViewBag.RifasRestantes</strong> números.
+                </p>
+
+                <div class="d-inline-flex align-items-center p-2 px-4 bg-white rounded-pill shadow-sm border">
+                    <span class="me-2">🏆</span>
+                    <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.70rem;">Líder de compras:</span>
+                    <span class="ms-2 badge rounded-pill bg-black">@ViewBag.MejorComprador con @ViewBag.MejorCantidad </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>¡Atención!</strong> @ViewBag.Error
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="rifas-grid">
         @foreach (var rifa in Model)
         {
-            @* Convertimos el Enum a minúsculas *@
             string estadoClase = rifa.state.ToString().ToLower();
-
-            @* Lógica para el clic: Solo si está disponible *@
-            string miClick = "";
-            if (rifa.state == LogicaNegocio.Rifa.EstadoRifa.Disponible)
-            {
-                miClick = $"prepararReserva({rifa.id})";
-            }
-
+            bool esDisponible = rifa.state == LogicaNegocio.Rifa.EstadoRifa.Disponible;
+            
             <div class="rifa-box @estadoClase"
-                 title="Estado: @rifa.state"
-                 onclick="@miClick"
-                 style="@(rifa.state == LogicaNegocio.Rifa.EstadoRifa.Disponible ? "cursor: pointer;" : "")">
+                 onclick="@(esDisponible ? $"prepararReserva({rifa.id})" : "")"
+                 style="@(esDisponible ? "cursor: pointer;" : "")">
 
-                <span class="numero-rifa">#@rifa.id</span>
-                <span class="precio-rifa">$@rifa.prize</span>
-
-                @if (rifa.comprador != null)
+                <span class="numero-rifa">@rifa.id</span>
+                 @if (rifa.state == LogicaNegocio.Rifa.EstadoRifa.Vendido)
                 {
-                    <small style="font-size: 0.6rem;">@rifa.comprador.name</small>
+                    <span class="precio-rifa">¡Vendido!</span>
                 }
+                else
+                {
+                    <span class="precio-rifa">$@rifa.prize</span>
+                }
+               
             </div>
         }
     </div>
@@ -133,8 +110,10 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Correo Electrónico</label>
-                    <input type="email" name="email" class="form-control" placeholder="ejemplo@correo.com" required />
-                    <div class="invalid-feedback">Por favor, ingresa un correo válido.</div>
+                    <input type="email" name="email" id="inputEmail" class="form-control" required />
+                    <div id="errorEmail" class="text-danger" style="display:none; font-size: 0.8rem; margin-top: 5px;">
+                        Por favor, ingresa un correo electrónico válido.
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -144,32 +123,38 @@
     </div>
 </div>
 
+
+
 @section Scripts {
+
     <script>
-    function prepararReserva(id) {
-        console.log("Intentando abrir rifa:", id); // Esto nos dirá en consola si la función responde
+        function prepararReserva(id) {
+            console.log("Intentando abrir rifa:", id); // Esto nos dirá en consola si la función responde
 
-        // 1. Llenamos los datos en el formulario
-        const inputId = document.getElementById('inputIdRifa');
-        const labelId = document.getElementById('labelIdRifa');
-        
-        if(inputId) inputId.value = id;
-        if(labelId) labelId.innerText = id;
+            // 1. Llenamos los datos en el formulario
+            const inputId = document.getElementById('inputIdRifa');
+            const labelId = document.getElementById('labelIdRifa');
 
-        // 2. Abrimos el modal de forma manual
-        // Buscamos el elemento
-        var modalElement = document.getElementById('modalReserva');
-        
-        // Usamos la API de Bootstrap para mostrarlo
-        if (typeof bootstrap !== 'undefined') {
-            var myModal = new bootstrap.Modal(modalElement);
-            myModal.show();
-        } else {
-            console.error("Error: Bootstrap JS no está cargado.");
-            alert("Error de sistema: No se encontró la librería de Bootstrap.");
+            if (inputId) inputId.value = id;
+            if (labelId) labelId.innerText = id;
+
+            // 2. Abrimos el modal de forma manual
+            // Buscamos el elemento
+            var modalElement = document.getElementById('modalReserva');
+
+            // Usamos la API de Bootstrap para mostrarlo
+            if (typeof bootstrap !== 'undefined') {
+                var myModal = new bootstrap.Modal(modalElement);
+                myModal.show();
+            } else {
+                console.error("Error: Bootstrap JS no está cargado.");
+                alert("Error de sistema: No se encontró la librería de Bootstrap.");
+            }
         }
-    }
-</script>
 
+         
+
+
+    </script>
 
 }

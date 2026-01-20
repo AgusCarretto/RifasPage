@@ -1,0 +1,70 @@
+﻿@model IEnumerable<LogicaNegocio.Rifa>
+@section Styles {
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📊 Gestión de Rifas</h2>
+        <a asp-action="Logout" class="btn btn-outline-danger btn-sm">Cerrar Sesión</a>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <table class="table table-hover table-responsive-stack">
+                <thead class="table-dark">
+                    <tr>
+                        <th># Rifa</th>
+                        <th>Estado</th>
+                        <th>Comprador</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var rifa in Model)
+                    {
+                        <tr>
+                            <td data-label="NÚMERO"><strong>@rifa.id</strong></td>
+                            <td data-label="ESTADO">
+                                @if (rifa.state == LogicaNegocio.Rifa.EstadoRifa.Disponible)
+                                {
+                                    <span class="badge bg-success">Disponible</span>
+                                }
+                                else if (rifa.state == LogicaNegocio.Rifa.EstadoRifa.Reservado)
+                                {
+                                    <span class="badge bg-warning text-dark">Reservado</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Vendido</span>
+                                }
+                            </td>
+                            <td data-label="COMPRADOR">
+                                @if (rifa.comprador != null)
+                                {
+                                    <div>
+                                        <strong>@rifa.comprador.name</strong><br />
+                                        <small class="text-muted">@rifa.comprador.phoneNumber</small>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                            <td data-label="GESTIÓN">
+                                @if (rifa.state == LogicaNegocio.Rifa.EstadoRifa.Reservado)
+                                {
+                                    <form asp-action="ConfirmarPago" method="post">
+                                        <input type="hidden" name="idRifa" value="@rifa.id" />
+                                        <button type="submit" class="btn btn-primary btn-sm w-100">✔ Confirmar</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
