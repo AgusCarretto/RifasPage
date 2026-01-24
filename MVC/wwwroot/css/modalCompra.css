@@ -1,0 +1,86 @@
+.modal {
+    top: 70px !important; 
+}
+
+.modal-content {
+    border: none !important;
+    border-radius: 1.5rem !important;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15) !important;
+}
+
+.modal-header {
+    background-color: #1a1a1a;
+    color: white;
+    border-bottom: 2px solid #2e7d32;
+    padding: 1.5rem !important;
+}
+
+.modal-title {
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.input-group-text {
+    border: 2px solid #f0f0f0;
+    color: #2e7d32;
+    font-size: 1.1rem;
+}
+
+.form-control {
+    border: 2px solid #f0f0f0;
+    padding: 12px 15px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+}
+
+    /*Con esto saco el focus azul de base*/
+    input:focus,
+    textarea:focus,
+    select:focus,
+    .form-control:focus,
+    .btn:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+#modalReserva .form-control:focus {
+    border-color: #2e7d32 !important;
+    background-color: #fafffb;
+    transition: all 0.3s ease;
+}
+
+.input-group:focus-within .input-group-text {
+    border-color: #2e7d32 !important;
+    color: #2e7d32;
+    background-color: #e8f5e9;
+}
+
+
+
+
+
+
+.btn-reserva-final {
+    background: linear-gradient(45deg, #2e7d32, #43a047);
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+    .btn-reserva-final:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(46, 125, 50, 0.2);
+        filter: brightness(1.1);
+    }
+
+    .btn-reserva-final:focus, .btn-reserva-final:active {
+        outline: none !important;
+        box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3) !important;
+    }

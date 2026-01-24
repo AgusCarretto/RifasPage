@@ -10,48 +10,57 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/nav-bar.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MVC.styles.css" asp-append-version="true" />
     @RenderSection("Styles", required: false)
 </head>
 <body>
     <header>
-        @if (Context.Session.GetString("admin") != null)
-        {
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MVC</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-black sticky-top shadow-sm">
+            <div class="container">
+                @if (Context.Session.GetString("admin") != null)
+                {
+                    <a class="navbar-brand fw-bold text-success" asp-controller="Admin" asp-action="Dashboard">LONDRES 2027 <span class="badge bg-danger ms-2" style="font-size: 0.5rem;">ADMIN</span></a>
+                }
+                else
+                {
+                    <a class="navbar-brand fw-bold" href="#">LONDRES 2027</a>
+                }
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-evenly">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto align-items-center">
+
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" href="/Home/Index#descripcion">Info</a>
                         </li>
-                        @{
-
-                            if (Context.Session.GetString("admin") != null)
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Dashboard">Dashboard</a>
-                                </li>
-
-                               
-                            }
-
-                        }
-                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Home/Index#rifas">Elegir Números</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Home/Index#premios">Premios</a>
+                        </li>
                        
 
+                        @if (Context.Session.GetString("admin") != null)
+                        {
+                            <li class="nav-item ms-lg-3">
+                                <a class="btn btn-outline-warning btn-sm fw-bold" asp-controller="Admin" asp-action="Dashboard">
+                                    <i class="bi bi-speedometer2"></i> DASHBOARD
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
         </nav>
-        }
     </header>
+
     <div class="container">
-        <main role="main" class="pb-3">
+        <main role="main">
             @RenderBody()
         </main>
     </div>

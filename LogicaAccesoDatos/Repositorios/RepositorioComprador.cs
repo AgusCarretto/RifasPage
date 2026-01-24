@@ -20,13 +20,26 @@ namespace LogicaAccesoDatos.Repositorios
         public int Agregar(Comprador nuevo)
         {
 
-            nuevo.Validar();
-            this.Context.Compradores.Add(nuevo);
-            this.Context.SaveChanges();
-            return nuevo.id;
+            Comprador comprador = findByNumber(nuevo.phoneNumber);
 
+            if (comprador != null)
+            {
+                return comprador.id;
+            }
+            else
+            {
+                nuevo.Validar();
+                this.Context.Compradores.Add(nuevo);
+                this.Context.SaveChanges();
+                return nuevo.id;
+            }
         }
 
+
+        public Comprador findByNumber(string number)
+        {
+            return this.Context.Compradores.FirstOrDefault(n => n.phoneNumber == number);
+        }
 
 
 

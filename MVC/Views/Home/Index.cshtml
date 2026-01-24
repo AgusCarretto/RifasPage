@@ -1,6 +1,7 @@
 ﻿@model IEnumerable<LogicaNegocio.Rifa>
 @section Styles {
     <link rel="stylesheet" href="~/css/rigas-grid.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/modalCompra.css" asp-append-version="true" />
 }
 @{
     ViewData["Title"] = "Venta de Rifas";
@@ -18,44 +19,58 @@
     <div class="text-center my-5">
         <h1 class="brand-title">LONDRES 2027</h1>
         <p class="brand-subtitle">Sorteos & Rifas</p>
-        <hr style="width: 50px; border: 2px solid #2e7d32; margin: 10px auto;">
+        <hr style="width: 100px; border: 2px solid #2e7d32; margin: 10px auto;">
 
-        <div class="d-flex justify-content-center gap-3 mt-3">
+       
+    </div>
+
+
+    <section id="descripcion" class="mb-5 py-2 py-md-4 bg-light">
+        @await Html.PartialAsync("_SeccionDescripcion")
+    </section>
+
+    <hr style="width: 100px; border: 2px solid #2e7d32; margin: 10px auto;">
+
+
+    <section id="rifas" class="py-5">
+
+        <div class="d-flex justify-content-center gap-3 mb-4">
             <span class="badge bg-success">Disponible</span>
             <span class="badge bg-warning text-dark">Pendiente/Reservado</span>
             <span class="badge bg-danger">No disponible</span>
         </div>
-    </div>
+        
+        <div class="container">
+            <div class="container mb-3">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 text-center">
 
-    <div class="container mb-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8 text-center">
-                <h5 class="mb-3 fw-bold text-muted" style="letter-spacing: 2px; font-size: 0.8rem;">🎯 OBJETIVO DE LA COLECTA</h5>
+                       
 
-                <div class="progress mb-3">
-                    <div class="progress-bar progress-bar-striped"
-                         role="progressbar"
-                         style="width: @ViewBag.Porcentaje%;"
-                         aria-valuenow="@ViewBag.Porcentaje"
-                         aria-valuemin="0"
-                         aria-valuemax="100">
-                        @ViewBag.Porcentaje%
+                        <p class="text-muted fs-5 ">
+                            Solo quedan <strong>@ViewBag.RifasRestantes</strong> números.
+                        </p>
+
+                        <div class="text-center my-3">
+                            <div class="mb-1" style="font-size: 1.5rem;">🏆</div>
+
+                            <div class="text-muted small fw-bold text-uppercase mb-2" style="letter-spacing: 2px; font-size: 0.65rem;">
+                                Persona que más apoyó
+                            </div>
+
+                            <div>
+                                <span class="badge rounded-pill bg-black px-4 py-2" style="font-size: 0.9rem; font-weight: 500;">
+                                    <strong> @ViewBag.MejorComprador </strong>comprando @ViewBag.MejorCantidad rifas
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <p class="text-muted mb-4 fs-5 ">
-                    ¡Ya completamos el <strong>@ViewBag.Porcentaje%</strong>! Solo quedan <strong>@ViewBag.RifasRestantes</strong> números.
-                </p>
-
-                <div class="d-inline-flex align-items-center p-2 px-4 bg-white rounded-pill shadow-sm border">
-                    <span class="me-2">🏆</span>
-                    <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.70rem;">Líder de compras:</span>
-                    <span class="ms-2 badge rounded-pill bg-black">@ViewBag.MejorComprador con @ViewBag.MejorCantidad </span>
-                </div>
             </div>
-        </div>
-    </div>
 
+        </div>
+    
+    
 
     @if (ViewBag.Error != null)
     {
@@ -70,13 +85,15 @@
         {
             string estadoClase = rifa.state.ToString().ToLower();
             bool esDisponible = rifa.state == LogicaNegocio.Rifa.EstadoRifa.Disponible;
-            
+
             <div class="rifa-box @estadoClase"
-                 onclick="@(esDisponible ? $"prepararReserva({rifa.id})" : "")"
+                 data-id="@rifa.id"
+                 data-precio="@rifa.prize"
+                 onclick="@(esDisponible ? $"seleccionarRifa({rifa.id})" : "")"
                  style="@(esDisponible ? "cursor: pointer;" : "")">
 
                 <span class="numero-rifa">@rifa.id</span>
-                 @if (rifa.state == LogicaNegocio.Rifa.EstadoRifa.Vendido)
+                @if (rifa.state == LogicaNegocio.Rifa.EstadoRifa.Vendido)
                 {
                     <span class="precio-rifa">¡Vendido!</span>
                 }
@@ -84,75 +101,220 @@
                 {
                     <span class="precio-rifa">$@rifa.prize</span>
                 }
-               
+
             </div>
         }
     </div>
 
+    <button id="btnConfirmarSeleccion" class="btn btn-primary btn-lg shadow-lg">
+        <i class="bi bi-cart-check me-2"></i> Comprar <span id="contadorRifas">0</span> rifas
+    </button>
+    </section>
 </div>
 
 <div class="modal fade" id="modalReserva" tabindex="-1">
     <div class="modal-dialog">
-        <form asp-action="Reservar" method="post" class="modal-content">
+        <form asp-action="Reservar" id="formReserva" method="post" class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Reservar Rifa #<span id="labelIdRifa"></span></h5>
             </div>
-            <div class="modal-body">
-                <input type="hidden" name="idRifa" id="inputIdRifa" />
+            <div class="modal-body p-4">
+                <input type="hidden" name="idRifas" id="inputIdRifa" />
 
                 <div class="mb-3">
-                    <label>Nombre Completo</label>
-                    <input type="text" name="nombre" class="form-control" required />
+                    <label class="form-label fw-bold text-muted small">NOMBRE COMPLETO</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-person"></i></span>
+                        <input type="text" name="nombre" class="form-control border-start-0 ps-0" placeholder="Nombre" required />
+                    </div>
                 </div>
+
                 <div class="mb-3">
-                    <label>Teléfono (WhatsApp)</label>
-                    <input type="text" name="telefono" class="form-control" required />
+                    <label class="form-label fw-bold text-muted small">WHATSAPP (TELÉFONO)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-telephone"></i></span>
+                        <input type="tel"
+                               name="telefono"
+                               class="form-control"
+                               placeholder="Celular"
+                               pattern="[0-9]{8,11}"
+                               title="Ingresa un número de teléfono válido (entre 8 y 11 números)"
+                               required />
+                        @*Esto es para que el form vaya viendo si ponen almenos 8 a 11 numeros*@
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Correo Electrónico</label>
-                    <input type="email" name="email" id="inputEmail" class="form-control" required />
-                    <div id="errorEmail" class="text-danger" style="display:none; font-size: 0.8rem; margin-top: 5px;">
-                        Por favor, ingresa un correo electrónico válido.
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-muted small">CORREO ELECTRÓNICO</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope"></i></span>
+                        <input type="email" name="email" id="inputEmail" class="form-control border-start-0 ps-0" placeholder="Email" required />
+                    </div>
+                    <div id="errorEmail" class="text-danger mt-1" style="display:none; font-size: 0.75rem;">
+                        Por favor, ingresa un correo válido para enviarte el comprobante.
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Reservar ahora</button>
+                <button type="submit" class="btn btn-reserva-final btn-primary">Reservar ahora</button>
             </div>
         </form>
     </div>
 </div>
+
+<div class="modal fade" id="modalInstrucciones" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold">📝 ÚLTIMO PASO</h5>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <i class="bi bi-bank text-success" style="font-size: 3rem;"></i>
+                <h4 class="mt-3 fw-bold">¡Casi listo!</h4>
+                <p class="text-muted">Para confirmar tu reserva, realiza la transferencia:</p>
+
+                <div class="bg-light p-3 rounded-3 border text-start mb-3">
+                    <p class="mb-1"><strong>Banco:</strong> ITAU (Caja de Ahorros)</p>
+                    <p class="mb-1"><strong>Número:</strong> 3901430</p>
+                    <p class="mb-1"><strong>Titular:</strong> Agustín Carretto</p>
+                    <p class="mb-0"><strong>Total:</strong> <span id="montoTotal" class="badge bg-success fs-6">$0</span></p>
+                </div>
+
+                <p class="small text-dark fw-bold">⚠️ Envía el comprobante por WhatsApp para validar. ⚠️</p>
+
+                <a id="btnEnviarComprobante" href="#" target="_blank" class="btn btn-success w-100 py-3 rounded-pill fw-bold">
+                    <i class="bi bi-whatsapp"></i> ENVIAR COMPROBANTE
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="loaderOverlay" class="loader-overlay" style="display: none;">
+    <div class="text-center">
+        <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <h5 class="text-white mt-3 fw-bold" style="letter-spacing: 2px;">PROCESANDO RESERVA...</h5>
+        <p class="text-white-50 small">Asegurando tus números en Londres 2027</p>
+    </div>
+</div>
+
+
+<hr style="width: 100px; border: 2px solid #2e7d32; margin: 10px auto;">
+
+<section id="premios" class="py-5 bg-light">
+    @await Html.PartialAsync("_SeccionPremios")
+</section>
+
+
+
+
+
 
 
 
 @section Scripts {
 
     <script>
-        function prepararReserva(id) {
-            console.log("Intentando abrir rifa:", id); // Esto nos dirá en consola si la función responde
 
-            // 1. Llenamos los datos en el formulario
-            const inputId = document.getElementById('inputIdRifa');
-            const labelId = document.getElementById('labelIdRifa');
+        let rifasSeleccionadas = [];
 
-            if (inputId) inputId.value = id;
-            if (labelId) labelId.innerText = id;
+        function seleccionarRifa(id) {
+            const caja = document.querySelector(`.rifa-box[data-id="${id}"]`);
+            const index = rifasSeleccionadas.indexOf(id);
 
-            // 2. Abrimos el modal de forma manual
-            // Buscamos el elemento
-            var modalElement = document.getElementById('modalReserva');
-
-            // Usamos la API de Bootstrap para mostrarlo
-            if (typeof bootstrap !== 'undefined') {
-                var myModal = new bootstrap.Modal(modalElement);
-                myModal.show();
+            if (index > -1) {
+                rifasSeleccionadas.splice(index, 1);
+                caja.classList.remove('seleccionada-animada');
             } else {
-                console.error("Error: Bootstrap JS no está cargado.");
-                alert("Error de sistema: No se encontró la librería de Bootstrap.");
+                rifasSeleccionadas.push(id);
+                caja.classList.add('seleccionada-animada');
+            }
+
+            actualizarInterfaz();
+        }
+
+        function actualizarInterfaz() {
+            const btn = document.getElementById('btnConfirmarSeleccion');
+            const contador = document.getElementById('contadorRifas');
+
+            if (rifasSeleccionadas.length > 0) {
+                btn.style.display = 'block';
+                contador.innerText = rifasSeleccionadas.length;
+            } else {
+                btn.style.display = 'none';
             }
         }
 
-         
+
+
+        document.getElementById('btnConfirmarSeleccion').addEventListener('click', function () {
+
+            document.getElementById('labelIdRifa').innerText = rifasSeleccionadas.join(", ");
+            document.getElementById('inputIdRifa').value = rifasSeleccionadas.join(",");
+
+            var modalElement = document.getElementById('modalReserva');
+            var myModal = new bootstrap.Modal(modalElement);
+            myModal.show();
+        });
+
+
+
+
+
+
+        $('#formReserva').submit(function (e) {
+            e.preventDefault();
+
+
+            $("#loaderOverlay").fadeIn(300);
+            const instance = bootstrap.Modal.getInstance(document.getElementById('modalReserva'));
+            if (instance) instance.hide();
+
+
+            const form = $(this);
+
+            $.post(form.attr('action'), form.serialize(), function (response) {
+                $("#loaderOverlay").fadeOut(300, function () {
+                    if (response.success) {
+                        mostrarInstrucciones(response.ids, response.total);
+                    } else {
+                        alert("Error: " + response.message);
+                    }
+                });
+            }).fail(function () {
+                $("#loaderOverlay").hide();
+                alert("Error de conexión con el servidor.");
+            });
+        });
+
+
+
+
+        function mostrarInstrucciones(ids, monto) {
+            document.getElementById('montoTotal').innerText = "$" + monto;
+
+
+            let mensaje = `Hola Agus! 👋 Te envío el comprobante por las rifas: ${ids}. Total: $${monto}`;
+            let encoded = encodeURIComponent(mensaje);
+
+            document.getElementById('btnEnviarComprobante').href = `https://wa.me/59892114480?text=${encoded}`;
+
+            new bootstrap.Modal(document.getElementById('modalInstrucciones')).show();
+
+        }
+
+
+
+
+        document.getElementById('modalInstrucciones').addEventListener('hidden.bs.modal', function () {
+            location.reload();
+        });
+
+
+
 
 
     </script>

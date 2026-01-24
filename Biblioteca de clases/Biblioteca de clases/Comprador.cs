@@ -22,6 +22,7 @@ namespace LogicaNegocio
         public void Validar()
         {
             validarMail();
+            validarNumero();
         }
 
 
@@ -41,7 +42,22 @@ namespace LogicaNegocio
                 throw new Exception("Ingrese un mail valido");
             }
 
+        }
 
+
+
+        public void validarNumero()
+        {
+            if (string.IsNullOrWhiteSpace(this.phoneNumber)) //nullo o con espacios negativo central
+                throw new Exception("El teléfono es obligatorio.");
+
+            
+            string motivo = @"^[0-9]{8,11}$";
+
+            if (!Regex.IsMatch(this.phoneNumber, motivo))
+            {
+                throw new Exception("El formato del teléfono no es válido. Ingresa solo números.");
+            }
         }
 
 

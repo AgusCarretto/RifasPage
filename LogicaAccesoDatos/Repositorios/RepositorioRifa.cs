@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LogicaAccesoDatos.Repositorios
 {
@@ -58,10 +59,28 @@ namespace LogicaAccesoDatos.Repositorios
                 rifa.state = Rifa.EstadoRifa.Reservado;
                 rifa.CompradorId = idComprador;
 
-                this.Context.SaveChanges();
+               
             }
 
         }
+
+        public void ReservarVariasRifas(string idsRifas, int idComprador)
+        {
+
+            List<int> idsRifasSeleccionadas = idsRifas.Split(',')
+                                        .Select(int.Parse)
+                                        .ToList();
+            foreach (int id in idsRifasSeleccionadas)
+            {
+                ReservarRifa(id, idComprador);
+            }
+
+
+            this.Context.SaveChanges();
+
+
+        }
+
 
         public MejorCompradorDTO ObtenerMejorComprador()
         {
@@ -76,6 +95,30 @@ namespace LogicaAccesoDatos.Repositorios
         })
         .OrderByDescending(x => x.Cantidad)
         .FirstOrDefault();
+        }
+
+        public decimal calcularMonto(string idsRifas)
+        {
+            decimal total = 0;
+            List<int> idsRifasSeleccionadas = idsRifas.Split(',')
+                                        .Select(int.Parse)
+                                        .ToList();
+            foreach (int id in idsRifasSeleccionadas)
+            {
+                total += precioDeUnaRifa(id);
+            }
+            
+            return total;
+        
+        }
+
+
+        public decimal precioDeUnaRifa(int id)
+        {
+            Rifa rifa = this.Context.Rifas.Find(id);
+
+            return rifa.prize;
+
         }
 
 

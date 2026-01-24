@@ -18,6 +18,7 @@ html {
 }
 
 body {
+    padding-top: 70px;
     font-family: 'Poppins', sans-serif;
     display: flex;
     flex-direction: column;
@@ -49,34 +50,6 @@ main, .container {
     font-size: 0.9rem;
 }
 
-
-.progress-bar {
-    font-size: 0.9rem;
-    letter-spacing: 1px;
-    background: linear-gradient(45deg, #2e7d32, #43a047);
-}
-
-
-
-.progress {
-    height: 35px !important;
-    border-radius: 20px !important;
-    background-color: #f0f0f0 !important;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1) !important;
-    overflow: hidden;
-}
-
-.progress-bar {
-    background-image: none !important;
-    background: linear-gradient(45deg, #2e7d32, #43a047) !important;
-    color: white !important;
-    font-weight: bold;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: width 1.5s ease-in-out;
-}
 
 
 /*PARTE DEL FOOTER*/
@@ -114,3 +87,34 @@ main, .container {
 }
 
 
+/*Parte del modal para seccion multiple*/
+
+.seleccionada-animada {
+    background: linear-gradient(45deg, #1a1a1a, #2e7d32) !important;
+    color: white !important;
+    transform: scale(1.05);
+    border: 3px solid #43a047 !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
+    transition: all 0.2s ease;
+}
+
+    .seleccionada-animada .precio-rifa {
+        color: #43a047 !important;
+    }
+
+
+
+    /*Para el load*/
+.loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; 
+    backdrop-filter: blur(5px); 
+}

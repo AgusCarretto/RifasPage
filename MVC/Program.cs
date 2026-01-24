@@ -1,3 +1,4 @@
+using LogicaAccesoDatos;
 using LogicaAccesoDatos.EF; // Asegúrate de tener estas referencias
 using LogicaAccesoDatos.Repositorios;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +29,7 @@ builder.Services.AddDbContext<ProyectoContext>(options =>
 builder.Services.AddScoped<RepositorioRifa>();
 builder.Services.AddScoped<RepositorioComprador>();
 builder.Services.AddScoped<RepositorioAdmin>();
-
+builder.Services.AddScoped<ServicioEmail>();
 
 
 var app = builder.Build();
