@@ -1,5 +1,5 @@
 using LogicaAccesoDatos;
-using LogicaAccesoDatos.EF; // Asegúrate de tener estas referencias
+using LogicaAccesoDatos.EF;
 using LogicaAccesoDatos.Repositorios;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,10 +21,8 @@ builder.Services.AddSession(options =>
 
 
 builder.Services.AddDbContext<ProyectoContext>(options =>
-{
-    // Usamos la misma cadena que pusiste en tu clase Context
-    options.UseSqlServer("SERVER=localhost;DATABASE=RifasLondres;Trusted_Connection=True;TrustServerCertificate=True;");
-});
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 builder.Services.AddScoped<RepositorioRifa>();
 builder.Services.AddScoped<RepositorioComprador>();

@@ -84,14 +84,14 @@ namespace MVC.Controllers
                     string mensajeWpp = $"¡Hola Agustín! 👋 Aquí envío el comprobante por las rifas: {idRifas}";
                     string mensajeWppUrl = System.Net.WebUtility.UrlEncode(mensajeWpp);
                     string linkWpp = $"https://wa.me/59892114480?text={mensajeWppUrl}";
-
+                    string rifasParceadas = _repoRifa.separarRifas(idRifas);
                     /*Cuerpo del mail a enviar al comprador*/
 
                     string cuerpoMail = $@"
                         <div style='font-family: Arial; border: 1px solid #2e7d32; padding: 20px;'>
                             <h2 style='color: #2e7d32;'>LONDRES 2027 - Reserva Exitosa</h2>
                             <p>Hola <b>{nombre}</b>, muchisimas gracias por ayudarme a hacer este viaje realidad!</p>
-                            <p><b>Reservaste los números: {idRifas}</b></p>
+                            <p><b>Reservaste los números: {rifasParceadas}</b></p>
                             <p><b>Total a transferir: ${montoTotal}</b></p>
                             <hr>
                             <p><b>Cuenta ITAU:</b> 3901430</p>

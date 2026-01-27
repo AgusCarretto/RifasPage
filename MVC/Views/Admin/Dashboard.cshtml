@@ -5,10 +5,61 @@
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>📊 Gestión de Rifas</h2>
+        <h2><strong>ADMIN</strong></h2>
         <a asp-action="Logout" class="btn btn-outline-danger btn-sm">Cerrar Sesión</a>
     </div>
 
+    
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-success text-white">
+                <div class="card-body">
+                    <h6 class="text-uppercase small fw-bold">Total Recaudado</h6>
+                    <h2 class="fw-bold mb-0">$ @ViewBag.Recaudacion</h2>
+                    <div class="small opacity-75">Meta: $ 48.000</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-white p-1">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted small fw-bold">Números Vendidos</h6>
+                    <h2 class="fw-bold mb-0 text-dark">@ViewBag.Vendidas <small class="text-muted fs-6">/ 80</small></h2>
+                    <div class="progress mt-2" style="height: 5px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: @ViewBag.Progreso%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-white p-1">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted small fw-bold">Pendientes de Pago</h6>
+                    <h2 class="fw-bold mb-0 text-warning">@ViewBag.Reservadas</h2>
+                    <p class="small text-secondary mb-0">Reservas por confirmar</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3 align-items-center">
+        <div class="col mb-2">
+            <h4 class="fw-bold m-0">📊 Gestión de RIFAS</h4>
+        </div>
+        <div class="col-auto mt-2">
+            <div class="d-flex align-items-center gap-2">
+                <label class="small fw-bold text-muted text-uppercase">Filtrar:</label>
+                <select id="filtroEstado" class="form-select form-select-sm rounded-pill border-success border-2 shadow-sm" style="width: 200px;">
+                    <option value="">Todos los números</option>
+                    <option value="Vendido">Vendidos</option>
+                    <option value="Reservado">Reservados</option>
+                    <option value="Disponible">Disponibles</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <br />
     <div class="card shadow">
         <div class="card-body">
             <table class="table table-hover table-responsive-stack">
@@ -57,7 +108,17 @@
                                 {
                                     <form asp-action="ConfirmarPago" method="post">
                                         <input type="hidden" name="idRifa" value="@rifa.id" />
-                                        <button type="submit" class="btn btn-primary btn-sm w-100">✔ Confirmar</button>
+                                        <button type="submit" class="btn btn-primary btn-sm w-100"
+                                                onclick="return confirm('¿Vender el número @rifa.id?')">
+                                            ✔ Confirmar
+                                        </button>
+                                    </form>
+                                    <br/>
+                                    <form asp-action="CancelarRifa" asp-route-id="@rifa.id" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-warning btn-sm w-100"
+                                                onclick="return confirm('¿Liberar el número @rifa.id?')">
+                                            🔄 Cancelar/Liberar
+                                        </button>
                                     </form>
                                 }
                             </td>
@@ -67,4 +128,37 @@
             </table>
         </div>
     </div>
+    <div class="alert alert-danger mt-4">
+        <h5>Zona de Peligro</h5>
+        <p class="small">Esto borrará todas las rifas actuales y cargará del 4001 al 4080.</p>
+
+        <form asp-controller="Admin" asp-action="ResetearRifas" method="post">
+            <button type="submit" class="btn btn-danger fw-bold"
+                    onclick="return confirm('¿Estás seguro? Se perderán todos los datos actuales.')">
+                RESETEAR Y CARGAR 80 RIFAS
+            </button>
+        </form>
+    </div>
 </div>
+
+
+<script>
+
+    document.getElementById('filtroEstado').addEventListener('change', function () {
+        const valEstado = this.value.toLowerCase();
+        const filas = document.querySelectorAll('table tbody tr');
+
+        filas.forEach(fila => {
+
+            const textoFila = fila.innerText.toLowerCase();
+
+            if (valEstado === "" || textoFila.includes(valEstado)) {
+                fila.style.display = '';
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+    });
+
+
+</script>

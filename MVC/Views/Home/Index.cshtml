@@ -175,11 +175,18 @@
 
                 <div class="bg-light p-3 rounded-3 border text-start mb-3">
                     <p class="mb-1"><strong>Banco:</strong> ITAU (Caja de Ahorros)</p>
-                    <p class="mb-1"><strong>Número:</strong> 3901430</p>
+                    <div class="d-flex align-items-center mb-1">
+                        <p class="mb-0"><strong>Número:</strong> <span id="numCuenta">3901430</span></p>
+                        <button type="button" class="btn btn-sm btn-outline-dark border-0 py-0" onclick="copiarCuenta()" title="Copiar número">
+                            <i class="bi bi-clipboard"></i> <span style="font-size: 0.75rem;">COPIAR</span>
+                        </button>
+                    </div>
                     <p class="mb-1"><strong>Titular:</strong> Agustín Carretto</p>
                     <p class="mb-0"><strong>Total:</strong> <span id="montoTotal" class="badge bg-success fs-6">$0</span></p>
                 </div>
-
+                <div id="alertaCopiado" class="text-success small fw-bold mb-2" style="display:none; transition: 0.3s;">
+                    ✅ ¡Número copiado!
+                </div>
                 <p class="small text-dark fw-bold">⚠️ Envía el comprobante por WhatsApp para validar. ⚠️</p>
 
                 <a id="btnEnviarComprobante" href="#" target="_blank" class="btn btn-success w-100 py-3 rounded-pill fw-bold">
@@ -314,7 +321,21 @@
         });
 
 
+        function copiarCuenta() {
+            const num = document.getElementById("numCuenta").innerText;
 
+            navigator.clipboard.writeText(num).then(() => {
+                const alerta = document.getElementById("alertaCopiado");
+
+                alerta.style.display = "block";
+
+                setTimeout(() => {
+                    alerta.style.display = "none";
+                }, 2000);
+            }).catch(err => {
+                console.error('Error al copiar: ', err);
+            });
+        }
 
 
     </script>

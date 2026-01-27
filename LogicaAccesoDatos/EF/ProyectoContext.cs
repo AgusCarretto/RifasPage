@@ -18,15 +18,15 @@ namespace LogicaAccesoDatos.EF
         public ProyectoContext(DbContextOptions<ProyectoContext> options) : base(options) { }
         
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
 
-            string cadenaConexion =
-             @"SERVER=localhost;
-            DATABASE=RifasLondres;
-            Trusted_Connection=True;";
+        //    string cadenaConexion =
+        //     @"SERVER=localhost;
+        //    DATABASE=RifasLondres;
+        //    Trusted_Connection=True;";
             
-        }
+        //}
 
 
 

@@ -50,6 +50,25 @@ namespace LogicaAccesoDatos.Repositorios
         }
 
 
+        public async Task cargaRifas80()
+        {
+            for (int i = 4001; i <= 4080; i++)
+            {
+                var rifa = new Rifa
+                {
+                    id = i,
+                    prize = 600,
+                    state = Rifa.EstadoRifa.Disponible
+                };
+
+                Context.Rifas.Add(rifa);
+            
+            }
+
+            await Context.SaveChangesAsync();
+
+        }
+
         public void ReservarRifa(int idRifa, int idComprador)
         {
 
@@ -121,6 +140,50 @@ namespace LogicaAccesoDatos.Repositorios
 
         }
 
+        public async Task CancelarRifa(int id)
+        {
 
+            var rifa = Context.Rifas.Find(id);
+
+            if (rifa != null)
+            {
+                rifa.state = Rifa.EstadoRifa.Disponible;
+                rifa.CompradorId = null;
+
+                await Context.SaveChangesAsync();
+
+            }
+
+        }
+
+
+        public int ContarRifasVendidas()
+        {
+            return this.Context.Rifas.Count(r => r.state == Rifa.EstadoRifa.Vendido);
+        }
+
+        public decimal CalcularRecaudacionTotal()
+        {
+            return this.Context.Rifas
+                .Where(r => r.state == Rifa.EstadoRifa.Vendido)
+                .Sum(r => r.prize);
+        }
+
+        public int CantidadDeRifasReservadas()
+        {
+            return this.Context.Rifas.Count(r => r.state == Rifa.EstadoRifa.Reservado);
+        }
+
+        public string separarRifas(string idRifas)
+        {
+
+            List<int> idsRifasSeleccionadas = idRifas.Split(',')
+                                     .Select(int.Parse)
+                                     .ToList();
+
+
+            return string.Join(",  ", idsRifasSeleccionadas.Select(n => "#" + n));
+
+        }
     }
 }

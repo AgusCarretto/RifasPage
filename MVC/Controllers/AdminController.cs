@@ -2,6 +2,7 @@
 using LogicaNegocio;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace MVC.Controllers
 {
@@ -76,6 +77,15 @@ namespace MVC.Controllers
                 }
                 else{
 
+                    var rifasVendidas = _repoRifa.ContarRifasVendidas();
+                    var rifasReservadas = _repoRifa.CantidadDeRifasReservadas();
+                    var totalRecaudado = _repoRifa.CalcularRecaudacionTotal();
+
+                    ViewBag.Vendidas = rifasVendidas;
+                    ViewBag.Reservadas = rifasReservadas;
+                    ViewBag.Recaudacion = totalRecaudado;
+                    ViewBag.Progreso = (ViewBag.Vendidas * 100) / 80;
+
                     var rifas = _repoRifa.ObtenerTodas();
                     return View(rifas);
 
@@ -104,14 +114,36 @@ namespace MVC.Controllers
                 return RedirectToAction("Login");
             }
                 
-               
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> CancelarRifa(int id)
+        {
+            await _repoRifa.CancelarRifa(id);
+            TempData["SuccessMessage"] = $"La rifa {id} esta disponible nuevamente.";
+            return RedirectToAction("Dashboard");
+
+        }
+
 
         public IActionResult Logout()
         {
             HttpContext.Session.Remove("admin");
             return RedirectToAction("Login");
         }
+
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> ResetearRifas()
+        {
+            await _repoRifa.cargaRifas80();
+            return RedirectToAction("Dashboard");
+        }
+
+
 
     }
 }
