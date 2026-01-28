@@ -1,4 +1,4 @@
-# 🇬🇧 Sistema de Gestión de Rifas - Londres 2027
+# Sistema de Gestión de Rifas - Inglaterra 2027
 
 ## 💡 Sobre el Proyecto
 
