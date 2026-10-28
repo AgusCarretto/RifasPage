@@ -80,14 +80,37 @@
         </div>
     }
 
+    @{
+        int tandaInicial = ViewBag.TandaInicial ?? 1;
+    }
+
+    @if (Model.Any())
+    {
+        <div class="tandas-selector" role="group" aria-label="Tandas">
+            @foreach (var tanda in new[] { 1, 2 })
+            {
+                int libres = Model.Count(r => r.Tanda == tanda && r.state == LogicaNegocio.Rifa.EstadoRifa.Disponible);
+
+                <button type="button"
+                        class="btn-tanda @(tanda == tandaInicial ? "activa" : "")"
+                        data-tanda="@tanda"
+                        onclick="mostrarTanda(@tanda)">
+                    @(tanda == 1 ? "1ra tanda" : "2da tanda")
+                    <small>@(libres > 0 ? $"{libres} libres" : "agotada")</small>
+                </button>
+            }
+        </div>
+    }
+
     <div class="rifas-grid">
         @foreach (var rifa in Model)
         {
             string estadoClase = rifa.state.ToString().ToLower();
             bool esDisponible = rifa.state == LogicaNegocio.Rifa.EstadoRifa.Disponible;
 
-            <div class="rifa-box @estadoClase"
+            <div class="rifa-box @estadoClase @(rifa.Tanda == tandaInicial ? "" : "d-none")"
                  data-id="@rifa.id"
+                 data-tanda="@rifa.Tanda"
                  data-precio="@rifa.prize"
                  onclick="@(esDisponible ? $"seleccionarRifa({rifa.id})" : "")"
                  style="@(esDisponible ? "cursor: pointer;" : "")">
@@ -227,6 +250,16 @@
     <script>
 
         let rifasSeleccionadas = [];
+
+        // Muestra solo los números de la tanda elegida. Lo ya seleccionado en la otra tanda se conserva.
+        function mostrarTanda(tanda) {
+            document.querySelectorAll('.rifa-box').forEach(function (caja) {
+                caja.classList.toggle('d-none', caja.dataset.tanda !== String(tanda));
+            });
+            document.querySelectorAll('.btn-tanda').forEach(function (boton) {
+                boton.classList.toggle('activa', boton.dataset.tanda === String(tanda));
+            });
+        }
 
         function seleccionarRifa(id) {
             const caja = document.querySelector(`.rifa-box[data-id="${id}"]`);

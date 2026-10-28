@@ -28,8 +28,10 @@ namespace LogicaAccesoDatos.Repositorios
         {
             try
             {
+                // Sin OrderBy el orden no está definido y en PostgreSQL una rifa actualizada pasa al final de la lista.
                 return this.Context.Rifas
             .Include(r => r.comprador)
+            .OrderBy(r => r.id)
             .ToList();
 
             }

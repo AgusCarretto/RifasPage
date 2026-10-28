@@ -48,7 +48,12 @@
             <h4 class="fw-bold m-0">📊 Gestión de RIFAS</h4>
         </div>
         <div class="col-auto mt-2">
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                <div class="btn-group btn-group-sm" role="group" aria-label="Tandas" id="filtroTanda">
+                    <button type="button" class="btn btn-outline-success active" data-tanda="">Todas</button>
+                    <button type="button" class="btn btn-outline-success" data-tanda="1">1ra tanda</button>
+                    <button type="button" class="btn btn-outline-success" data-tanda="2">2da tanda</button>
+                </div>
                 <label class="small fw-bold text-muted text-uppercase">Filtrar:</label>
                 <select id="filtroEstado" class="form-select form-select-sm rounded-pill border-success border-2 shadow-sm" style="width: 200px;">
                     <option value="">Todos los números</option>
@@ -74,7 +79,7 @@
                 <tbody>
                     @foreach (var rifa in Model)
                     {
-                        <tr>
+                        <tr data-tanda="@rifa.Tanda">
                             <td data-label="NÚMERO"><strong>@rifa.id</strong></td>
                             <td data-label="ESTADO">
                                 @if (rifa.state == LogicaNegocio.Rifa.EstadoRifa.Disponible)
@@ -144,19 +149,30 @@
 
 <script>
 
-    document.getElementById('filtroEstado').addEventListener('change', function () {
-        const valEstado = this.value.toLowerCase();
+    let tandaActiva = "";
+
+    // Combina el filtro de estado con el de tanda.
+    function aplicarFiltros() {
+        const valEstado = document.getElementById('filtroEstado').value.toLowerCase();
         const filas = document.querySelectorAll('table tbody tr');
 
         filas.forEach(fila => {
 
             const textoFila = fila.innerText.toLowerCase();
+            const coincideEstado = valEstado === "" || textoFila.includes(valEstado);
+            const coincideTanda = tandaActiva === "" || fila.dataset.tanda === tandaActiva;
 
-            if (valEstado === "" || textoFila.includes(valEstado)) {
-                fila.style.display = '';
-            } else {
-                fila.style.display = 'none';
-            }
+            fila.style.display = (coincideEstado && coincideTanda) ? '' : 'none';
+        });
+    }
+
+    document.getElementById('filtroEstado').addEventListener('change', aplicarFiltros);
+
+    document.querySelectorAll('#filtroTanda button').forEach(boton => {
+        boton.addEventListener('click', function () {
+            tandaActiva = this.dataset.tanda;
+            document.querySelectorAll('#filtroTanda button').forEach(b => b.classList.toggle('active', b === this));
+            aplicarFiltros();
         });
     });
 

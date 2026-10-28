@@ -41,6 +41,46 @@
         cursor: not-allowed;
     }
 
+/* Selector de tandas */
+.tandas-selector {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+.btn-tanda {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.25;
+    min-width: 130px;
+    padding: 8px 20px;
+    border: 2px solid #2e7d32;
+    border-radius: 12px;
+    background: #fff;
+    color: #2e7d32;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+}
+
+    .btn-tanda small {
+        font-size: 0.7rem;
+        font-weight: 500;
+        opacity: 0.85;
+    }
+
+    .btn-tanda:hover {
+        background: #e8f5e9;
+    }
+
+    .btn-tanda.activa {
+        background: linear-gradient(135deg, #43a047, #2e7d32);
+        color: #fff;
+    }
+
 .numero-rifa {
     font-size: 1.5rem;
     font-weight: 700;
