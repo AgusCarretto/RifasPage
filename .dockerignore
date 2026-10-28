@@ -1,0 +1,13 @@
+**/bin
+**/obj
+**/.vs
+.git
+.gitignore
+.gitattributes
+.vscode
+Repos
+docs
+deploy
+README.md
+Dockerfile
+.dockerignore
