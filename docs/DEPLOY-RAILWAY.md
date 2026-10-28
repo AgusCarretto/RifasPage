@@ -53,6 +53,22 @@ Con la app ya desplegada (las tablas existen y están vacías):
 psql "<DATABASE_PUBLIC_URL del servicio Postgres>" -v ON_ERROR_STOP=1 -f import.sql
 ```
 
+**En Windows hay que forzar UTF-8 antes de correr `psql`**, si no usa la codificación de la consola (Windows-1252) y los acentos
+quedan guardados mal (`Verónica` se ve como `VerÃ³nica`):
+
+```powershell
+$env:PGCLIENTENCODING = "UTF8"
+& "C:\Program Files\PostgreSQL\18\bin\psql.exe" "<DATABASE_PUBLIC_URL>" -v ON_ERROR_STOP=1 -f "$HOME\Downloads\import.sql"
+```
+
+Para volver a importar (por ejemplo, el día del cambio) primero se vacían las tablas. El SQL va por stdin porque PowerShell
+pierde las comillas dobles cuando se pasan como argumento de `psql`:
+
+```powershell
+$env:PGCLIENTENCODING = "UTF8"
+'TRUNCATE "Rifas","Compradores","Admin" RESTART IDENTITY;' | & "C:\Program Files\PostgreSQL\18\bin\psql.exe" "<DATABASE_PUBLIC_URL>" -v ON_ERROR_STOP=1
+```
+
 La URL pública está en el servicio Postgres > *Variables* (`DATABASE_PUBLIC_URL`) o en la pestaña *Connect*.
 El script va dentro de una transacción: si falla, no queda nada a medias. Si no tenías datos para exportar,
 creá el admin a mano:
