@@ -9,9 +9,9 @@ Los mails se envían por la API HTTPS de [Brevo](https://www.brevo.com), porque 
 | Variable | Valor | Obligatoria |
 |---|---|---|
 | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (referencia al servicio de base de datos; ajustá `Postgres` al nombre real del servicio) | Sí |
-| `EmailSettings__ApiKey` | API key de Brevo | Sí (sin esto no salen mails, pero la reserva igual se guarda y el error queda en los logs) |
-| `EmailSettings__SenderEmail` | Remitente verificado en Brevo | Sí |
-| `EmailSettings__AdminEmail` | Mail donde llega el aviso de cada reserva | Sí |
+| `EmailSettings__ApiKey` | API key de Brevo | No: **los mails son opcionales**. Sin esta variable no se manda ninguno (queda una línea informativa en los logs) y la reserva funciona igual, porque la pantalla ya muestra la cuenta y el botón de WhatsApp. |
+| `EmailSettings__SenderEmail` | Remitente verificado en Brevo | Solo si se activan los mails |
+| `EmailSettings__AdminEmail` | Mail donde llega el aviso de cada reserva | Solo si se activan los mails |
 | `EmailSettings__SenderName` | Nombre del remitente (por defecto `Rifas Londres 2027`) | No |
 
 El `Dockerfile` ya fija `ASPNETCORE_ENVIRONMENT=Production`, `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` y
@@ -32,7 +32,8 @@ Si preferís un connection string de Npgsql en vez de `DATABASE_URL`, definí `C
    `import.sql` y `results.json` tienen datos personales de los compradores y la clave del admin: no los guardes dentro del repo.
 2. Copiá la configuración del App Service (connection string y cualquier otra variable) por si hace falta consultarla.
 
-### 1. Mails (Brevo)
+### 1. Mails (Brevo) — opcional
+Se puede saltear: la app funciona sin mails. Para activarlos más adelante:
 1. Creá una cuenta en Brevo y verificá el remitente que vas a usar (`EmailSettings__SenderEmail`).
 2. Generá una API key (sección *SMTP & API*).
 3. Si el remitente es una casilla de Gmail, probá que los mails no caigan en spam; un dominio propio verificado mejora mucho la entregabilidad.
