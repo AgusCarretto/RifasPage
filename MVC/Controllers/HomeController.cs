@@ -41,13 +41,6 @@ namespace MVC.Controllers
             ViewBag.Porcentaje = (total > 0) ? (vendidas * 100 / total) : 0;
             ViewBag.RifasRestantes = total - vendidas;
 
-            // Tanda que se muestra al entrar: la primera que todavía tiene números disponibles (si no queda ninguna, la 1ra).
-            ViewBag.TandaInicial = rifas
-                .Where(r => r.state == Rifa.EstadoRifa.Disponible)
-                .Select(r => r.Tanda)
-                .DefaultIfEmpty(1)
-                .Min();
-
 
             return View(rifas);
         }

@@ -81,13 +81,15 @@
     }
 
     @{
-        int tandaInicial = ViewBag.TandaInicial ?? 1;
+        // Al entrar se muestra siempre la 2da tanda, aunque la 1ra tenga números libres.
+        const int tandaInicial = 2;
     }
 
     @if (Model.Any())
     {
         <div class="tandas-selector" role="group" aria-label="Tandas">
-            @foreach (var tanda in new[] { 1, 2 })
+            @* La 2da tanda va primero *@
+            @foreach (var tanda in new[] { 2, 1 })
             {
                 int libres = Model.Count(r => r.Tanda == tanda && r.state == LogicaNegocio.Rifa.EstadoRifa.Disponible);
 
@@ -96,7 +98,14 @@
                         data-tanda="@tanda"
                         onclick="mostrarTanda(@tanda)">
                     @(tanda == 1 ? "1ra tanda" : "2da tanda")
-                    <small>@(libres > 0 ? $"{libres} libres" : "agotada")</small>
+                    @if (libres > 0)
+                    {
+                        <small>@(libres == 1 ? "1 libre" : $"{libres} libres")</small>
+                    }
+                    else
+                    {
+                        <span class="tanda-agotada">AGOTADA</span>
+                    }
                 </button>
             }
         </div>

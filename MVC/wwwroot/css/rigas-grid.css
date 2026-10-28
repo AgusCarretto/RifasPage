@@ -72,6 +72,18 @@
         opacity: 0.85;
     }
 
+    /* Cartel de tanda sin números libres */
+    .btn-tanda .tanda-agotada {
+        margin-top: 3px;
+        padding: 1px 10px;
+        border-radius: 999px;
+        background: #d32f2f;
+        color: #fff;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
     .btn-tanda:hover {
         background: #e8f5e9;
     }
