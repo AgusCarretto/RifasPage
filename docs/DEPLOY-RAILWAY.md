@@ -24,6 +24,12 @@ Si preferís un connection string de Npgsql en vez de `DATABASE_URL`, definí `C
 
 ### 0. Antes de que se cierre Azure
 1. Exportá los datos: ejecutá [`deploy/azure-export.sql`](../deploy/azure-export.sql) en Azure SQL y guardá el resultado como `import.sql`.
+   Si exportaste la celda como JSON (`results.json`), extraé el SQL con PowerShell (sin BOM, para que `psql` lo lea bien):
+   ```powershell
+   $j = Get-Content results.json -Raw -Encoding UTF8 | ConvertFrom-Json
+   [IO.File]::WriteAllText("$PWD\import.sql", $j[0].postgres_import_sql, (New-Object Text.UTF8Encoding $false))
+   ```
+   `import.sql` y `results.json` tienen datos personales de los compradores y la clave del admin: no los guardes dentro del repo.
 2. Copiá la configuración del App Service (connection string y cualquier otra variable) por si hace falta consultarla.
 
 ### 1. Mails (Brevo)
