@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace LogicaAccesoDatos.Migrations
 {
     /// <inheritdoc />
-    public partial class FirstMigration : Migration
+    public partial class InicialPostgres : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,11 +15,11 @@ namespace LogicaAccesoDatos.Migrations
                 name: "Admin",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    email = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    password = table.Column<string>(type: "text", nullable: false),
+                    email = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -29,11 +30,11 @@ namespace LogicaAccesoDatos.Migrations
                 name: "Compradores",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    phoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    email = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    phoneNumber = table.Column<string>(type: "text", nullable: false),
+                    email = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -44,10 +45,10 @@ namespace LogicaAccesoDatos.Migrations
                 name: "Rifas",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false),
-                    prize = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CompradorId = table.Column<int>(type: "int", nullable: true),
-                    state = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "integer", nullable: false),
+                    prize = table.Column<decimal>(type: "numeric", nullable: false),
+                    CompradorId = table.Column<int>(type: "integer", nullable: true),
+                    state = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

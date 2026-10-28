@@ -1,88 +1,88 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mail;
-using System.Net;
-using System.Text;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
 namespace LogicaAccesoDatos
 {
+    /// <summary>
+    /// Envía mails por la API HTTPS de Brevo (https://developers.brevo.com/reference/sendtransacemail).
+    /// No usa SMTP porque Railway bloquea los puertos SMTP salientes en el plan Hobby.
+    /// Configuración: EmailSettings:ApiKey, EmailSettings:SenderEmail, EmailSettings:SenderName y EmailSettings:AdminEmail.
+    /// </summary>
     public class ServicioEmail
     {
+        private const string Endpoint = "https://api.brevo.com/v3/smtp/email";
 
+        private static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
 
         private readonly IConfiguration _config;
+        private readonly HttpClient _http;
 
-        public ServicioEmail(IConfiguration config)
+        public ServicioEmail(IConfiguration config, HttpClient http)
         {
             _config = config;
+            _http = http;
         }
 
-        public void AlertaDeReserva(string nombre, string rifaId, string emailComprador, string telefono)
+        // Son async para que cualquier error (incluida la configuración faltante) llegue como Task fallida y no como excepción síncrona.
+        public async Task AlertaDeReserva(string nombre, string rifaId, string emailComprador, string telefono)
         {
-
-
-            var user = _config["EmailSettingsAdmin:SenderEmail"];
-            var passAdmin = _config["EmailSettingsAdmin:AppPassword"];
-            var fromAddress = new MailAddress(user, "Sistema de Rifas");
-            var toAddress = new MailAddress(user);
-            var port = int.Parse(_config["EmailSettingsAdmin:Port"]);
+            var admin = Requerida("EmailSettings:AdminEmail");
 
             const string subject = "⚠️ ¡Nueva Reserva de Rifa!";
             string body = $"Hola Agus,\n\nAlguien ha reservado la rifa #{rifaId}.\nNombre: {nombre}\nTelefono:{telefono} \nEmail: {emailComprador}\n\nRevisa el panel de control para confirmar el pago.";
 
-            var smtp = new SmtpClient
+            await Enviar(admin, subject, htmlContent: null, textContent: body, nombreRemitente: "Sistema de Rifas");
+        }
+
+        public async Task EnviarEmail(string emailDestino, string asunto, string cuerpoHtml)
+        {
+            await Enviar(emailDestino, asunto, htmlContent: cuerpoHtml, textContent: null, nombreRemitente: _config["EmailSettings:SenderName"]);
+        }
+
+        private async Task Enviar(string destino, string asunto, string? htmlContent, string? textContent, string? nombreRemitente)
+        {
+            var apiKey = Requerida("EmailSettings:ApiKey");
+            var remitente = Requerida("EmailSettings:SenderEmail");
+
+            var payload = new
             {
-                Host = "smtp.gmail.com",
-                Port = port,
-                EnableSsl = true,
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(fromAddress.Address, passAdmin)
+                sender = new { name = nombreRemitente, email = remitente },
+                to = new[] { new { email = destino } },
+                subject = asunto,
+                htmlContent,
+                textContent
             };
 
-            using (var message = new MailMessage(fromAddress, toAddress) { Subject = subject, Body = body })
+            using var request = new HttpRequestMessage(HttpMethod.Post, Endpoint)
             {
-                smtp.Send(message);
+                Content = JsonContent.Create(payload, options: JsonOptions)
+            };
+            request.Headers.Add("api-key", apiKey);
+
+            using var response = await _http.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                var detalle = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Brevo respondió {(int)response.StatusCode}: {detalle}");
             }
         }
 
-
-
-        public void EnviarEmail(string emailDestino, string asunto, string cuerpoHtml)
+        private string Requerida(string clave)
         {
-            var host = _config["EmailSettings:SmtpServer"];
-            var port = int.Parse(_config["EmailSettings:Port"]);
-            var user = _config["EmailSettings:SenderEmail"];
-            var pass = _config["EmailSettings:AppPassword"];
-
-            var smtpClient = new SmtpClient("smtp.gmail.com") // Servidor de Gmail
+            var valor = _config[clave];
+            if (string.IsNullOrWhiteSpace(valor))
             {
-                Port = port,
-                Credentials = new NetworkCredential(user, pass),
-                EnableSsl = true,
-            };
-
-
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress(user, _config["EmailSettings:SenderName"]),
-                Subject = asunto,
-                Body = cuerpoHtml,
-                IsBodyHtml = true,
-            };
-
-            mailMessage.To.Add(emailDestino);
-
-            smtpClient.Send(mailMessage);
-
+                throw new InvalidOperationException($"Falta la configuración '{clave}'.");
+            }
+            return valor;
         }
-
-
-
-
-
     }
 }

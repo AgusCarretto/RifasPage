@@ -17,9 +17,10 @@ namespace MVC.Controllers
         private ServicioEmail _emailService;
 
 
-        public HomeController(RepositorioRifa repoRifa, RepositorioComprador repoComprador, ServicioEmail emailService)
+        public HomeController(RepositorioRifa repoRifa, RepositorioComprador repoComprador, ServicioEmail emailService, ILogger<HomeController> logger)
         {
 
+            _logger = logger;
             _repoRifa = repoRifa;
             _repoComprador = repoComprador;
             _emailService = emailService;
@@ -61,7 +62,7 @@ namespace MVC.Controllers
 
 
         [HttpPost]
-        public IActionResult Reservar(string idRifas, string nombre, string telefono, string email)
+        public async Task<IActionResult> Reservar(string idRifas, string nombre, string telefono, string email)
         {
 
             try
@@ -90,7 +91,7 @@ namespace MVC.Controllers
                     string cuerpoMail = $@"
                         <div style='font-family: Arial; border: 1px solid #2e7d32; padding: 20px;'>
                             <h2 style='color: #2e7d32;'>LONDRES 2027 - Reserva Exitosa</h2>
-                            <p>Hola <b>{nombre}</b>, muchisimas gracias por ayudarme a hacer este viaje realidad!</p>
+                            <p>Hola <b>{System.Net.WebUtility.HtmlEncode(nombre)}</b>, muchisimas gracias por ayudarme a hacer este viaje realidad!</p>
                             <p><b>Reservaste los números: {rifasParceadas}</b></p>
                             <p><b>Total a transferir: ${montoTotal}</b></p>
                             <hr>
@@ -109,12 +110,15 @@ namespace MVC.Controllers
                         </div>";
 
 
-                    _emailService.AlertaDeReserva(nombre, idRifas, email, telefono);
-                    _emailService.EnviarEmail(email, "Tu reserva de rifas", cuerpoMail);
+                    // En paralelo: si falla uno (p. ej. el aviso al admin) el otro se envía igual.
+                    await Task.WhenAll(
+                        _emailService.AlertaDeReserva(nombre, idRifas, email, telefono),
+                        _emailService.EnviarEmail(email, "Tu reserva de rifas", cuerpoMail));
                 }
                 catch (Exception ex)
                 {
-
+                    // La reserva ya está guardada: un mail fallido no debe tirarla abajo, pero sí queda registrado.
+                    _logger.LogError(ex, "No se pudo enviar el mail de la reserva {Rifas}", idRifas);
                 }
 
                 return Json(new { success = true, ids = idRifas, total = montoTotal });
