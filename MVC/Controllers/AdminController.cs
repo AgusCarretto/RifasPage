@@ -120,6 +120,11 @@ namespace MVC.Controllers
         [HttpPost]
         public async Task<IActionResult> CancelarRifa(int id)
         {
+            if (HttpContext.Session.GetString("admin") == null)
+            {
+                return RedirectToAction("Login");
+            }
+
             await _repoRifa.CancelarRifa(id);
             TempData["SuccessMessage"] = $"La rifa {id} esta disponible nuevamente.";
             return RedirectToAction("Dashboard");
@@ -139,6 +144,11 @@ namespace MVC.Controllers
         [HttpPost]
         public async Task<IActionResult> ResetearRifas()
         {
+            if (HttpContext.Session.GetString("admin") == null)
+            {
+                return RedirectToAction("Login");
+            }
+
             await _repoRifa.cargaRifas80();
             return RedirectToAction("Dashboard");
         }
